@@ -1,0 +1,139 @@
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id    String  @id @unique @default(cuid())
+  name  String
+  email String  @unique
+  password  String
+}
+
+model Soldier {
+  id            String    @id @default(cuid())
+  name          String
+  rank          SoldierRank  @default(PVT)
+  class         Int @default(0)
+  status SoldierStatus @default(ACTIVE)
+  unitId        String?
+  unit          Unit?    @relation(fields: [unitId], references: [id])
+  leadsUnit     Unit?    @relation("LeaderToUnit")
+}
+
+model Unit {
+  id            String    @id @default(cuid())
+  name          String
+  type          UnitType  @default(TEAM)
+  class         Int @default(1)
+  parentUnitId  String?
+  parentUnit    Unit?     @relation("UnitToSubUnits", fields: [parentUnitId], references: [id])
+  subUnits      Unit[]    @relation("UnitToSubUnits")
+  soldiers      Soldier[]
+  orders        Order[]
+  status        UnitStatus @default(ACTIVE)
+  equipment     Equipment[]
+  leaderId      String?
+  leader        Soldier?   @relation("LeaderToUnit", fields: [leaderId], references: [id])
+  nPosition     Float?
+  ePosition     Float?
+
+  @@unique([leaderId])
+}
+
+model Order {
+  id                 String           @id @default(cuid())
+  priority           OrderPriority    @default(LOW)
+  status             OrderStatus      @default(PENDING)
+  description        String?
+  assignedUnits      Unit[]
+  createdAt          DateTime         @default(now())
+  mapData            String           @default("{}")
+}
+
+model Equipment {
+  id          String    @id @default(cuid())
+  name        String
+  type        EquipmentType @default(OTHER)
+  description String?
+  status      EquipmentStatus   @default(ACTIVE)
+  assignedTo  Unit?     @relation(fields: [assignedToId], references: [id])
+  assignedToId String?
+}
+
+enum EquipmentType {
+  VEHICLE
+  WEAPON
+  OTHER
+}
+
+enum OrderPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum EquipmentStatus {
+  ACTIVE
+  UNDER_MAINTENANCE
+  DECOMMISSIONED
+}
+
+enum SoldierStatus {
+  ACTIVE
+  KIA
+  MIA
+  WIA
+  RETIRED
+  AWOL
+}
+
+enum UnitStatus {
+  ACTIVE
+  DECOMMISSIONED
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum UnitType {
+  TEAM
+  SQUAD
+  PLATOON
+  COMPANY
+  BATTALION
+  TASK_FORCE
+}
+
+enum SoldierRank {
+  PVT    // Private (0)
+  PFC    // Private First Class (0)
+  CPL    // Corporal (1)
+  SGT    // Sergeant (1)
+  SSGT   // Staff Sergeant (2)
+  SFC    // Sergeant First Class (2)
+  MSGT   // Master Sergeant (3)
+  FSG    // First Sergeant (3)
+  SGM    // Sergeant Major (3)
+  SLT    // Second Lieutenant (3)
+  FLT    // First Lieutenant (4)
+  CPT    // Captain (4)
+  MAJ    // Major (4)
+  LTC    // Lieutenant Colonel (5)
+  COL    // Colonel (5)
+  BG     // Brigadier General (5)
+  MG     // Major General (5)
+  LTG    // Lieutenant General (5)
+  GEN    // General (5)
+}
