@@ -1,5 +1,5 @@
-/frontend/src/.env
-/backend/src/.env
+/frontend/.env
+/backend/.env
 
 /frontend/node_modules/
 /backend/node_modules/
