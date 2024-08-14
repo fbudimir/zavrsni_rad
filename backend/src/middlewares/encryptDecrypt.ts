@@ -10,7 +10,7 @@ export const decryptRequestMiddleware = async (
       try {
         const decryptedData = await decrypt(req.body.encryptedData);
 
-        // sometimes its a string sometimes its already an object
+        // sometimes its a string, sometimes its already an object
         if (typeof decryptedData.data === "string") {
           req.body = JSON.parse(decryptedData.data);
         } else {
